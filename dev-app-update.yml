@@ -1,0 +1,4 @@
+---
+provider: generic
+url: https://auto-updates.kulala.mwco.app
+updaterCacheDirName: kulala-updater
