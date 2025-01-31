@@ -1,0 +1,184 @@
+---
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+jobs:
+  build-linux-arm64:
+    name: Build Linux ARM64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up env
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PLATFORM=linux-arm64" >> $GITHUB_ENV
+      - name: Install OS packages
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder && \
+          sudo snap install snapcraft --classic && \
+          flatpak remote-add \
+          --user \
+          --if-not-exists \
+          flathub https://flathub.org/repo/flathub.flatpakrepo
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Cache Bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: linux-arm64-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            linux-arm64-bun-${{ hashFiles('**/bun.lockb') }}
+      - name: Cache Electron
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/electron/
+          key: linux-arm64-electron-${{ hashFiles('~/.cache/electron/**') }}
+          restore-keys: |
+            linux-arm64-electron-${{ hashFiles('~/.cache/electron/**') }}
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build Linux ARM64
+        run: ./scripts/build.sh
+      - name: Linux Release
+        run: ./scripts/release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up env
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PLATFORM=linux" >> $GITHUB_ENV
+      - name: Install OS packages
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder && \
+          sudo snap install snapcraft --classic && \
+          flatpak remote-add \
+            --user \
+            --if-not-exists \
+            flathub https://flathub.org/repo/flathub.flatpakrepo
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Cache Bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: linux-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            linux-bun-${{ hashFiles('**/bun.lockb') }}
+      - name: Cache Electron
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/electron/
+          key: linux-electron-${{ hashFiles('~/.cache/electron/**') }}
+          restore-keys: |
+            linux-electron-${{ hashFiles('~/.cache/electron/**') }}
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build Linux
+        run: ./scripts/build.sh
+      - name: Linux Release
+        run: ./scripts/release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up env
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PLATFORM=windows" >> $GITHUB_ENV
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Cache Bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: windows-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            windows-bun-${{ hashFiles('**/bun.lockb') }}
+      - name: Cache Electron
+        uses: actions/cache@v4
+        with:
+          path: ~/AppData/Local/electron/Cache/
+          key: windows-electron-${{ hashFiles('~/AppData/Local/electron/Cache/**') }}
+          restore-keys: |
+            windows-electron-${{ hashFiles('~/AppData/Local/electron/Cache/**') }}
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build Windows
+        shell: bash
+        run: ./scripts/build.sh
+      - name: Windows Release
+        shell: bash
+        run: ./scripts/release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  build-macos:
+    name: Build MacOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install bash
+        run: brew install bash
+      - name: Set up env
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PLATFORM=macos" >> $GITHUB_ENV
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Cache Bun
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: macos-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            macos-bun-${{ hashFiles('**/bun.lockb') }}
+      - name: Cache Electron
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/electron/
+          key: macos-electron-${{ hashFiles('~/Library/Caches/electron/**') }}
+          restore-keys: |
+            macos-electron-${{ hashFiles('~/Library/Caches/electron/**') }}
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Build MacOS
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_NOTARIZATION_WEBHOOK_URL: ${{ secrets.APPLE_NOTARIZATION_WEBHOOK_URL }}
+        run: ./scripts/build.sh
+      - name: MacOS Release
+        run: ./scripts/release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

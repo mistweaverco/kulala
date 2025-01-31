@@ -1,0 +1,73 @@
+import { app, shell, BrowserWindow } from 'electron'
+import { join } from 'path'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import icon from '../../resources/icon.png?asset'
+import { windowStateKeeper } from './stateKeeper'
+import { ipcMainHandlersInit } from './ipcMainHandlers'
+
+let MAIN_WINDOW: BrowserWindow
+
+async function createWindow(): Promise<void> {
+  const mainWindowState = await windowStateKeeper('main')
+
+  MAIN_WINDOW = new BrowserWindow({
+    width: mainWindowState.width,
+    height: mainWindowState.height,
+    minWidth: 400,
+    minHeight: 200,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    show: false,
+    autoHideMenuBar: true,
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: true
+    }
+  })
+
+  mainWindowState.track(MAIN_WINDOW)
+
+  MAIN_WINDOW.on('ready-to-show', () => {
+    MAIN_WINDOW.show()
+  })
+
+  MAIN_WINDOW.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return { action: 'deny' }
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    MAIN_WINDOW.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  } else {
+    MAIN_WINDOW.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+
+  if (mainWindowState.isMaximized) {
+    MAIN_WINDOW.maximize()
+  }
+}
+
+app.whenReady().then(async () => {
+  electronApp.setAppUserModelId('app.mwco.kulala.desktop')
+
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window)
+  })
+
+  ipcMainHandlersInit()
+
+  await createWindow()
+
+  app.on('activate', function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
