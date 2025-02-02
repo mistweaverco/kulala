@@ -18,14 +18,14 @@
         <div class="navbar-item">
           <div class="buttons">
             <button
-              class="button {$activeView === 'home' ? 'is-active is-primary' : 'is-secondary'}"
-              data-action="home"
+              class="button {$activeView === 'explorer' ? 'is-active is-primary' : 'is-secondary'}"
+              data-action="explorer"
               on:click={handleTopButtonsClick}
             >
               <span class="icon">
-                <i class="fa-solid fa-right-to-bracket"></i>
+                <i class="fa fa-bolt"></i>
               </span>
-              <strong>Home</strong>
+              <strong>Explorer</strong>
             </button>
             <button
               class="button is-secondary {$activeView === 'about'
