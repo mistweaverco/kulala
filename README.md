@@ -19,7 +19,7 @@ Kulala is swahili for "rest" or "relax".
 
 It allows you to make HTTP requests via `.http` files.
 
-No Login  🕵️‍♀️, No tracking 🌈, No Ads 🔥, no BS 💩.
+No login 🌈, no tracking 🕵️‍♀️, No Ads 🔥, no BS 💩.
 
 <p></p>
 
