@@ -23,6 +23,8 @@ No Login  🕵️‍♀️, No tracking 🌈, No Ads 🔥, no BS 💩.
 
 <p></p>
 
+![Kulala Screenshot](assets/screenshot.png)
+
 </div>
 
 ## Install
