@@ -9,6 +9,7 @@
   let responseEditor: Monaco.editor.IStandaloneCodeEditor
   let responseEditorContainer: HTMLElement
 
+  let requestBodyTypeSelect: HTMLSelectElement
   let tabsList: HTMLUListElement
   let requestMethodSelect: HTMLSelectElement
   let requestUrlInput: HTMLInputElement
@@ -85,7 +86,9 @@
     if (trimmedData.startsWith('{') || trimmedData.startsWith('[')) {
       try {
         const parsedData = JSON.parse(trimmedData)
-        responseEditor.setModel(monaco.editor.createModel(JSON.stringify(parsedData, null, 2), 'json'))
+        responseEditor.setModel(
+          monaco.editor.createModel(JSON.stringify(parsedData, null, 2), 'json')
+        )
       } catch (err) {
         responseEditor.setModel(monaco.editor.createModel(data, 'text'))
       }
@@ -96,11 +99,34 @@
     }
   }
 
-  const sendRequest = (): void => {
-    clearResponse()
+  const getRequestBody = (): string => {
     const canHaveBody = ['POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE', 'CONNECT'].includes(
       requestMethodSelect.value
     )
+    if (!canHaveBody) {
+      return undefined
+    }
+
+    // TODO: Implement missing request body types
+    switch (requestBodyTypeSelect.value) {
+      case 'form-data':
+        return editor.getValue()
+      case 'x-www-form-urlencoded':
+        return undefined
+      case 'raw':
+        return editor.getValue()
+      case 'binary':
+        return undefined
+      case 'GraphQL':
+        return undefined
+      case 'none':
+      default:
+        return undefined
+    }
+  }
+
+  const sendRequest = (): void => {
+    clearResponse()
     isLoading = true
     abortController = new AbortController()
     fetch(requestUrlInput.value, {
@@ -108,7 +134,7 @@
       headers: {
         'Content-Type': 'application/json'
       },
-      body: canHaveBody ? editor.getValue() : undefined,
+      body: getRequestBody(),
       signal: abortController.signal
     })
       .then((res) => res.text())
@@ -363,7 +389,7 @@
             <div class="field">
               <div class="control">
                 <div class="select">
-                  <select>
+                  <select bind:this={requestBodyTypeSelect}>
                     <option>none</option>
                     <option>form-data</option>
                     <option>x-www-form-urlencoded</option>
