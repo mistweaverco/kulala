@@ -91,10 +91,10 @@
     "url": "https://github.com/oven-sh/bun"
   },
   {
-    "title": "SweetAlert2",
-    "description": "A beautiful, responsive, customizable, accessible (WAI-ARIA) replacement for JavaScript's popup boxes.",
-    "usage": "Used for displaying alerts and modals.",
+    "title": "Monaco Editor",
+    "description": "A browser based code editor.",
+    "usage": "Used for providing the code editor and previewer.",
     "license": "MIT",
-    "url": "https://github.com/sweetalert2/sweetalert2"
+    "url": "https://github.com/microsoft/monaco-editor"
   }
 ]
