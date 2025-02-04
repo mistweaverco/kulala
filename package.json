@@ -1,6 +1,6 @@
 {
   "name": "Kulala",
-  "version": "0.0.1",
+  "version": "0.0.0-debug",
   "description": "A minimal REST-Client GUI for Mac, Linux and Windows. It allows you to make HTTP requests via `.http` files.",
   "main": "./out/main/index.js",
   "author": {
@@ -23,8 +23,8 @@
     "build-windows": "bun run build && electron-builder --win --publish never",
     "build-macos": "./scripts/build.sh PLATFORM=macos",
     "build-linux": "./scripts/build.sh PLATFORM=linux",
-    "build-linux-arm64": "./scripts/build.sh PLATFORM=linux-arm64",
-    "build-linux-debug": "./scripts/build.sh PLATFORM=linux-debug",
+    "build-linux-arm64": "PLATFORM=linux-arm64 ./scripts/build.sh",
+    "build-linux-debug": "VERSION=0.0.0-debug PLATFORM=linux-debug ./scripts/build.sh",
     "node-packages-update": "ncu -u",
     "node-packages-upgrade": "ncu -u && bun install",
     "translations": "typesafe-i18n --no-watch",

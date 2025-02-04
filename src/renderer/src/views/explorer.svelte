@@ -617,10 +617,6 @@
 </div>
 
 <style>
-  .collections-list li {
-    margin-bottom: 10px;
-    cursor: pointer;
-  }
   .editor-wrap {
     width: calc(100% - (var(--bulma-input-radius) * 2));
     height: calc(240px - (var(--bulma-input-radius) * 2));

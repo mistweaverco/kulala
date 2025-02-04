@@ -1,6 +1,8 @@
 import * as monaco from 'monaco-editor'
 import themeData from './monaco-theme.json'
 
+const themeDataCast = themeData as monaco.editor.IStandaloneThemeData
+
 // Import the workers in a production-safe way.
 // This is different than in Monaco's documentation for Vite,
 // but avoids a weird error ("Unexpected usage") at runtime
@@ -8,7 +10,7 @@ import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 
-monaco.editor.defineTheme('custom-theme', themeData)
+monaco.editor.defineTheme('custom-theme', themeDataCast)
 monaco.editor.setTheme('custom-theme')
 
 self.MonacoEnvironment = {

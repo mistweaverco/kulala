@@ -11,7 +11,7 @@
 
   const GITHUB_REPO_URL = 'https://github.com/mistweaverco/kulala'
 
-  const externalLinkClickHandler = (target: HTMLElement, url: string): void => {
+  const externalLinkClickHandler = (url: string): void => {
     window.open(url, '_blank')
   }
 
@@ -19,7 +19,7 @@
     const url = e.currentTarget.dataset.url
     if (!url) return
 
-    externalLinkClickHandler(e.currentTarget, url)
+    externalLinkClickHandler(url)
   }
 </script>
 
