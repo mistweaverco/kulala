@@ -11,6 +11,7 @@ declare global {
     electron: ElectronAPI
     KulalaApi: {
       getAppVersion: () => Promise<string>
+      pickFiles: () => Promise<FileInfo[]>
     }
   }
 }

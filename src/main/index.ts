@@ -89,6 +89,11 @@ async function createMainWindow(): Promise<void> {
 app.whenReady().then(async () => {
   electronApp.setAppUserModelId('app.mwco.kulala.desktop')
 
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['User-Agent'] = 'Kulala/' + app.getVersion()
+    callback({ cancel: false, requestHeaders: details.requestHeaders })
+  })
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
@@ -97,10 +102,6 @@ app.whenReady().then(async () => {
 
   await createSplashWindow()
   await createMainWindow()
-
-  // app.on('activate', function () {
-  //   if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
-  // })
 })
 
 app.on('window-all-closed', () => {

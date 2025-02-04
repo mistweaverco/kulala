@@ -37,6 +37,7 @@
     "electron-settings": "4.0.4",
     "electron-updater": "6.3.9",
     "monaco-editor": "^0.52.2",
+    "sqlite3": "^5.1.7",
     "sweetalert2": "11.14.5",
     "typesafe-i18n": "5.26.2"
   },

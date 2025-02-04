@@ -7,6 +7,11 @@ declare global {
     electron: ElectronAPI
     KulalaApi: {
       getAppVersion: () => Promise<string>
+      pickFiles: (cn: string) => Promise<FileInfo[]>
+      getCollectionNames: () => Promise<string[]>
+      getFilesByCollectionName: (cn: string) => Promise<DBFilesRow[]>
+      getFileContent: (fp: string) => Promise<string>
+      removeFileFromCollection: (cn: string, fp: string) => Promise<void>
     }
   }
 }
