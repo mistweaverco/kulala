@@ -40,9 +40,12 @@ export const windowStateKeeper = async (windowName: string): Promise<WindowState
 
     const size = screen.getPrimaryDisplay().workAreaSize
 
+    const width = size.width / 2 > 1024 ? size.width / 2 : 1024
+    const height = size.height / 2 > 768 ? size.height / 2 : 768
+
     return {
-      width: size.width / 2,
-      height: size.height / 2,
+      width,
+      height,
       isMaximized: false
     }
   }
