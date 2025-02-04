@@ -57,6 +57,23 @@
     }
   }
 
+  const onRawSyntaxSelectChange = (evt): void => {
+    const selectedValue = evt.target.value
+    switch (selectedValue) {
+      case 'json':
+        editor.setModel(monaco.editor.createModel(editor.getValue(), 'json'))
+        break
+      case 'html':
+      case 'xml':
+        editor.setModel(monaco.editor.createModel(editor.getValue(), 'html'))
+        break
+      case 'text':
+      default:
+        editor.setModel(monaco.editor.createModel(editor.getValue(), 'text'))
+        break
+    }
+  }
+
   let abortController: AbortController
 
   const clearResponse = (): void => {
@@ -293,7 +310,7 @@
                       <div class="select">
                         <select bind:this={requestMethodSelect}>
                           <option value="GET">GET</option>
-                          <option value="POST">POST</option>
+                          <option value="POST" selected>POST</option>
                           <option value="PUT">PUT</option>
                           <option value="DELETE">DELETE</option>
                           <option value="OPTIONS">OPTIONS</option>
@@ -356,12 +373,11 @@
                   </select>
                 </div>
                 <div class="select">
-                  <select>
-                    <option>Text</option>
-                    <option>JavaScript</option>
-                    <option selected>JSON</option>
-                    <option>HTML</option>
-                    <option>XML</option>
+                  <select on:change={onRawSyntaxSelectChange}>
+                    <option value="text">Text</option>
+                    <option value="json" selected>JSON</option>
+                    <option value="html">HTML</option>
+                    <option value="html">XML</option>
                   </select>
                 </div>
               </div>
@@ -390,7 +406,7 @@
 <style>
   .editor-container {
     width: 100%;
-    height: 400px;
+    height: 240px;
   }
   .kulala-explorer-contents {
     width: 100%;
