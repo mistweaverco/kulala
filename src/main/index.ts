@@ -30,7 +30,7 @@ async function createSplashWindow(): Promise<void> {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     SPLASH_WINDOW.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/splash.html')
   } else {
-    SPLASH_WINDOW.loadFile(join(__dirname, '../renderer/index.html'))
+    SPLASH_WINDOW.loadFile(join(__dirname, '../renderer/splash.html'))
   }
 
   SPLASH_WINDOW.once('ready-to-show', () => {
