@@ -8,6 +8,7 @@
 
   let responseEditor: Monaco.editor.IStandaloneCodeEditor
   let responseEditorContainer: HTMLElement
+  let responseIsVisible = false
 
   let requestBodyTypeSelect: HTMLSelectElement
   let tabsList: HTMLUListElement
@@ -78,6 +79,7 @@
   let abortController: AbortController
 
   const clearResponse = (): void => {
+    responseIsVisible = false
     responseEditor.setValue('')
   }
 
@@ -97,6 +99,10 @@
     } else {
       responseEditor.setModel(monaco.editor.createModel(data, 'text'))
     }
+    responseIsVisible = true
+    setTimeout(() => {
+      responseEditor.layout()
+    }, 500)
   }
 
   const getRequestBody = (): string => {
@@ -165,7 +171,8 @@
     fillTabs()
     document.addEventListener('keydown', onDocumentKeyDown)
 
-    editor = monaco.editor.create(editorContainer)
+    editor = monaco.editor.create(editorContainer, {
+    })
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
       sendRequest()
     })
@@ -177,6 +184,11 @@
       sendRequest()
     })
     responseEditor.setModel(monaco.editor.createModel('', 'text'))
+
+    window.addEventListener("resize", () => {
+      editor.layout()
+      responseEditor.layout()
+    })
   })
   onDestroy(() => {
     monaco?.editor.getModels().forEach((model) => model.dispose())
@@ -412,14 +424,18 @@
             <div class="field mt-5">
               <div class="control">
                 <div>
-                  <div class="editor-container" bind:this={editorContainer} />
+                  <div class="editor-wrap">
+                    <div class="editor-container" bind:this={editorContainer} />
+                  </div>
                 </div>
               </div>
             </div>
 
             <div class="field mt-5">
               <div class="control">
-                <div class="editor-container" bind:this={responseEditorContainer} />
+                <div class="editor-wrap {responseIsVisible ? '' : 'is-hidden'}">
+                  <div class="editor-container" bind:this={responseEditorContainer} />
+                </div>
               </div>
             </div>
           </div>
@@ -430,9 +446,16 @@
 </div>
 
 <style>
+  .editor-wrap {
+    width: calc(100% - (var(--bulma-input-radius) * 2));
+    height: calc(240px - (var(--bulma-input-radius) * 2));
+    padding: var(--bulma-input-radius);
+    border: 1px solid #353a46;
+    border-radius: var(--bulma-input-radius);
+  }
   .editor-container {
-    width: 100%;
-    height: 240px;
+    width: calc(100% - (var(--bulma-input-radius) * 2));
+    height: calc(240px - (var(--bulma-input-radius) * 4));
   }
   .kulala-explorer-contents {
     width: 100%;

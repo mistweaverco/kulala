@@ -1,4 +1,5 @@
 import * as monaco from 'monaco-editor'
+import themeData from './monaco-theme.json'
 
 // Import the workers in a production-safe way.
 // This is different than in Monaco's documentation for Vite,
@@ -7,7 +8,8 @@ import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker'
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 
-monaco.editor.setTheme('vs-dark')
+monaco.editor.defineTheme('custom-theme', themeData)
+monaco.editor.setTheme('custom-theme')
 
 self.MonacoEnvironment = {
   getWorker: function (_: string, label: string): Worker {

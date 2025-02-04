@@ -26,7 +26,8 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          index: 'src/renderer/index.html'
+          index: 'src/renderer/index.html',
+          splash: 'src/renderer/splash.html'
         }
       }
     },
