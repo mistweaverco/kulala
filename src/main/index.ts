@@ -66,8 +66,10 @@ async function createMainWindow(): Promise<void> {
     MAIN_WINDOW.hide()
     setTimeout(() => {
       SPLASH_WINDOW.destroy()
+    }, 500)
+    setTimeout(() => {
       MAIN_WINDOW.show()
-    }, 1500)
+    }, 1000)
   })
 
   MAIN_WINDOW.webContents.setWindowOpenHandler((details) => {
