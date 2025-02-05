@@ -5,3 +5,7 @@ out
 *.log*
 .svelte-kit
 .vite
+*.http
+.env
+http-client.env.json
+http-client.private.env.json
