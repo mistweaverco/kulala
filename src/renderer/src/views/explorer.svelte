@@ -4,6 +4,12 @@
   import { monaco } from './monaco'
   import { getParsedDocument, type ParsedBlock, type ParsedDocument } from '../parser'
   import { useCollections, useFiles } from '../stores'
+  import type { OnSyntaxChangeHandler } from './explorer'
+  import {
+    createOnSyntaxChangeHandler,
+    createOnFileRemoveFromCollectionClick,
+    createOnFileClick
+  } from './explorer'
 
   let collections = useCollections()
   let files = useFiles()
@@ -123,24 +129,6 @@
     }
   }
 
-  const onRawSyntaxSelectChange = (evt: Event): void => {
-    const target = evt.target as HTMLSelectElement
-    const selectedValue = target.value
-    switch (selectedValue) {
-      case 'json':
-        editor.setModel(monaco.editor.createModel(editor.getValue(), 'json'))
-        break
-      case 'html':
-      case 'xml':
-        editor.setModel(monaco.editor.createModel(editor.getValue(), 'html'))
-        break
-      case 'text':
-      default:
-        editor.setModel(monaco.editor.createModel(editor.getValue(), 'text'))
-        break
-    }
-  }
-
   const togglePickCollectionModal = (): void => {
     pickCollectionModalIsVisible = !pickCollectionModalIsVisible
   }
@@ -205,7 +193,6 @@
       return undefined
     }
 
-    // TODO: Implement missing request body types
     switch (requestBodyTypeSelect.value) {
       case 'form-data':
         return editor.getValue()
@@ -286,22 +273,20 @@
     monaco?.editor.getModels().forEach((model) => model.dispose())
     editor?.dispose()
   })
-  const onFileClick = async (evt: MouseEvent): Promise<void> => {
-    const btn = (evt.target as HTMLSpanElement).closest('button') as HTMLButtonElement
-    const filePath = btn.dataset.filepath
-    const fileContent = await window.KulalaApi.getFileContent(filePath)
-    activeParsedDocument = getParsedDocument(fileContent)
-    fillDocumentBlocks()
-    setValuesBasedOnBlock(activeParsedDocument.blocks[0])
+  const onFileRemoveFromCollectionClick = createOnFileRemoveFromCollectionClick(collections)
+  let onRawSyntaxSelectChange: OnSyntaxChangeHandler
+  let onFileClick: (evt: MouseEvent) => Promise<void>
+  $: if (editor) {
+    onRawSyntaxSelectChange = createOnSyntaxChangeHandler(editor)
   }
-  const onFileRemoveFromCollectionClick = async (evt: MouseEvent): Promise<void> => {
-    const btn = (evt.target as HTMLSpanElement).closest('button') as HTMLButtonElement
-    const wrapper = btn.closest('.wrapper')
-    const collectionName = btn.dataset.collection
-    const filePath = btn.dataset.filepath
-    await window.KulalaApi.removeFileFromCollection(collectionName, filePath)
-    $collections = await window.KulalaApi.getCollectionNames()
-    wrapper.remove()
+  $: if (activeParsedDocument && editor) {
+    onFileClick = createOnFileClick(
+      activeParsedDocument,
+      documentBlocksSelect,
+      requestMethodSelect,
+      requestUrlInput,
+      editor
+    )
   }
 </script>
 
