@@ -10,8 +10,11 @@ export type FileInfo = {
 export const pickFiles = async (): Promise<FileInfo[]> => {
   const files: FileInfo[] = []
   const file = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    filters: [{ name: 'Text', extensions: ['http', 'rest'] }]
+    properties: ['openFile', 'multiSelections', 'showHiddenFiles'],
+    filters: [
+      { name: 'http', extensions: ['http', 'rest'] },
+      { name: 'env', extensions: ['env.json', 'env'] }
+    ]
   })
   if (file.canceled) {
     return files
