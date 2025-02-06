@@ -61,16 +61,19 @@
     { name: 'advanced.http', dir: '/home/marco/projects/personal/kulala.nvim/http-examples' }
   ]
 
-  const onFileMouseenter = (evt): void => {
-    evt.target.querySelector('.actions').classList.remove('is-hidden')
+  const onFileMouseenter = (evt: MouseEvent): void => {
+    const target = evt.target as HTMLElement
+    target.querySelector('.actions').classList.remove('is-hidden')
   }
 
-  const onFileMouseLeave = (evt): void => {
-    evt.target.querySelector('.actions').classList.add('is-hidden')
+  const onFileMouseLeave = (evt: MouseEvent): void => {
+    const target = evt.target as HTMLElement
+    target.querySelector('.actions').classList.add('is-hidden')
   }
 
-  const onDocumentBlocksSelectChange = (evt): void => {
-    const blockIndex = parseInt(evt.target.value)
+  const onDocumentBlocksSelectChange = (evt: Event): void => {
+    const target = evt.target as HTMLSelectElement
+    const blockIndex = parseInt(target.value)
     const block = activeParsedDocument.blocks[blockIndex]
     setValuesBasedOnBlock(block)
   }
@@ -120,8 +123,9 @@
     }
   }
 
-  const onRawSyntaxSelectChange = (evt): void => {
-    const selectedValue = evt.target.value
+  const onRawSyntaxSelectChange = (evt: Event): void => {
+    const target = evt.target as HTMLSelectElement
+    const selectedValue = target.value
     switch (selectedValue) {
       case 'json':
         editor.setModel(monaco.editor.createModel(editor.getValue(), 'json'))
@@ -135,6 +139,10 @@
         editor.setModel(monaco.editor.createModel(editor.getValue(), 'text'))
         break
     }
+  }
+
+  const togglePickCollectionModal = (): void => {
+    pickCollectionModalIsVisible = !pickCollectionModalIsVisible
   }
 
   const pickCollection = async (): Promise<void> => {
@@ -329,12 +337,7 @@
     <footer class="modal-card-foot">
       <div class="buttons">
         <button class="button is-success" on:click={pickFiles}>Pick files</button>
-        <button
-          class="button is-warning"
-          on:click={() => {
-            pickCollectionModalIsVisible = false
-          }}>Cancel</button
-        >
+        <button class="button is-warning" on:click={togglePickCollectionModal}> </button>
       </div>
     </footer>
   </div>
