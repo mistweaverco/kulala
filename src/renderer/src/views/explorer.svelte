@@ -2,8 +2,14 @@
   import { onDestroy, onMount } from 'svelte'
   import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api'
   import { monaco } from './monaco'
-  import { getParsedDocument, type ParsedBlock, type ParsedDocument } from '../parser'
+  import { type ParsedBlock, type ParsedDocument } from '../parser'
   import { useCollections, useFiles } from '../stores'
+  import type { OnSyntaxChangeHandler } from './explorer'
+  import {
+    createOnSyntaxChangeHandler,
+    createOnFileRemoveFromCollectionClick,
+    createOnFileClick
+  } from './explorer'
 
   let collections = useCollections()
   let files = useFiles()
@@ -78,16 +84,6 @@
     setValuesBasedOnBlock(block)
   }
 
-  const fillDocumentBlocks = (): void => {
-    documentBlocksSelect.innerHTML = ''
-    activeParsedDocument.blocks.forEach((block, i) => {
-      const option = document.createElement('option')
-      option.value = i.toString()
-      option.textContent = block.name
-      documentBlocksSelect.appendChild(option)
-    })
-  }
-
   const fillTabs = (): void => {
     tabs.forEach((t, i) => {
       const li = document.createElement('li')
@@ -120,24 +116,6 @@
   const onCtrlEnterSendRequest = (e: KeyboardEvent): void => {
     if (e.ctrlKey && e.key === 'Enter') {
       sendRequest()
-    }
-  }
-
-  const onRawSyntaxSelectChange = (evt: Event): void => {
-    const target = evt.target as HTMLSelectElement
-    const selectedValue = target.value
-    switch (selectedValue) {
-      case 'json':
-        editor.setModel(monaco.editor.createModel(editor.getValue(), 'json'))
-        break
-      case 'html':
-      case 'xml':
-        editor.setModel(monaco.editor.createModel(editor.getValue(), 'html'))
-        break
-      case 'text':
-      default:
-        editor.setModel(monaco.editor.createModel(editor.getValue(), 'text'))
-        break
     }
   }
 
@@ -205,7 +183,6 @@
       return undefined
     }
 
-    // TODO: Implement missing request body types
     switch (requestBodyTypeSelect.value) {
       case 'form-data':
         return editor.getValue()
@@ -286,22 +263,20 @@
     monaco?.editor.getModels().forEach((model) => model.dispose())
     editor?.dispose()
   })
-  const onFileClick = async (evt: MouseEvent): Promise<void> => {
-    const btn = (evt.target as HTMLSpanElement).closest('button') as HTMLButtonElement
-    const filePath = btn.dataset.filepath
-    const fileContent = await window.KulalaApi.getFileContent(filePath)
-    activeParsedDocument = getParsedDocument(fileContent)
-    fillDocumentBlocks()
-    setValuesBasedOnBlock(activeParsedDocument.blocks[0])
+  const onFileRemoveFromCollectionClick = createOnFileRemoveFromCollectionClick(collections)
+  let onRawSyntaxSelectChange: OnSyntaxChangeHandler
+  let onFileClick: (evt: MouseEvent) => Promise<void>
+  $: if (editor) {
+    onRawSyntaxSelectChange = createOnSyntaxChangeHandler(editor)
   }
-  const onFileRemoveFromCollectionClick = async (evt: MouseEvent): Promise<void> => {
-    const btn = (evt.target as HTMLSpanElement).closest('button') as HTMLButtonElement
-    const wrapper = btn.closest('.wrapper')
-    const collectionName = btn.dataset.collection
-    const filePath = btn.dataset.filepath
-    await window.KulalaApi.removeFileFromCollection(collectionName, filePath)
-    $collections = await window.KulalaApi.getCollectionNames()
-    wrapper.remove()
+  $: if (activeParsedDocument && editor) {
+    onFileClick = createOnFileClick(
+      activeParsedDocument,
+      documentBlocksSelect,
+      requestMethodSelect,
+      requestUrlInput,
+      editor
+    )
   }
 </script>
 
