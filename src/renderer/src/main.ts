@@ -1,6 +1,5 @@
 import '@fortawesome/fontawesome-free/css/all.min.css'
-import 'bulma/css/bulma.min.css'
-import '@sweetalert2/theme-bulma/bulma.min.css'
+import './app.css'
 import App from './App.svelte'
 import './overrides.css'
 

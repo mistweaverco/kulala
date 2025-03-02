@@ -8,7 +8,7 @@
 
 <Navigation />
 
-<section class="main-content container">
+<section class="m-5">
   {#if $activeView === 'explorer'}
     <ExplorerView />
   {:else if $activeView === 'about'}

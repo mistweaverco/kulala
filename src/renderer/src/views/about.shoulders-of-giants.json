@@ -35,11 +35,18 @@
     "url": "https://github.com/sveltejs/svelte"
   },
   {
-    "title": "Bulma",
-    "description": "A modern CSS framework based on Flexbox.",
+    "title": "Tailwind CSS",
+    "description": "A utility-first CSS framework for rapidly building custom designs.",
     "usage": "Used for styling the user interface.",
     "license": "MIT",
-    "url": "https://github.com/jgthms/bulma"
+    "url": "https://github.com/tailwindlabs/tailwindcss"
+  },
+  {
+    "title": "DaisyUI",
+    "description": "A component library for Tailwind CSS.",
+    "usage": "Used for styling the user interface.",
+    "license": "MIT",
+    "url": "https://daisyui.com/"
   },
   {
     "title": "eslint",

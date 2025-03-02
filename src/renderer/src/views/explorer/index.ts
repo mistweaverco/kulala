@@ -41,50 +41,7 @@ export const createOnFileRemoveFromCollectionClick = (collections: Writable<stri
   }
 }
 
-const setValuesBasedOnBlock = (
-  block: ParsedBlock,
-  requestMethodSelect: HTMLSelectElement,
-  requestUrlInput: HTMLInputElement,
-  editor: monaco.editor.IStandaloneCodeEditor
-): void => {
-  requestMethodSelect.value = block.method
-  requestUrlInput.value = block.url
-  editor.setValue(block.body)
-}
-
-const fillDocumentBlocks = (
-  documentBlocksSelect: HTMLSelectElement,
-  activeParsedDocument: ParsedDocument
-): void => {
-  documentBlocksSelect.innerHTML = ''
-  activeParsedDocument.blocks.forEach((block, i) => {
-    const option = document.createElement('option')
-    option.value = i.toString()
-    option.textContent = block.name
-    documentBlocksSelect.appendChild(option)
-  })
-}
-
-export type OnFileClick = (evt: MouseEvent) => Promise<void>
-
-export const createOnFileClick = (
-  activeParsedDocument: ParsedDocument,
-  documentBlocksSelect: HTMLSelectElement,
-  requestMethodSelect: HTMLSelectElement,
-  requestUrlInput: HTMLInputElement,
-  editor: monaco.editor.IStandaloneCodeEditor
-) => {
-  return async (evt: MouseEvent): Promise<void> => {
-    const btn = (evt.target as HTMLSpanElement).closest('button') as HTMLButtonElement
-    const filePath = btn.dataset.filepath
-    const fileContent = await window.KulalaApi.getFileContent(filePath)
-    activeParsedDocument = getParsedDocument(fileContent)
-    fillDocumentBlocks(documentBlocksSelect, activeParsedDocument)
-    setValuesBasedOnBlock(
-      activeParsedDocument.blocks[0],
-      requestMethodSelect,
-      requestUrlInput,
-      editor
-    )
-  }
+export const getActiveParsedDocument = async (filepath: string): Promise<ParsedDocument> => {
+  const fileContent = await window.KulalaApi.getFileContent(filepath)
+  return getParsedDocument(fileContent)
 }

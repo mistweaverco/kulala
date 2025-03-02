@@ -1,0 +1,31 @@
+@import 'tailwindcss';
+@plugin 'daisyui';
+
+.ui-resizable.ui-resizable-width {
+  position: relative;
+}
+
+.ui-resizable.ui-resizable-width::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 5px;
+  width: 5px;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.1);
+  cursor: ew-resize;
+  transition: background-color 0.2s ease;
+}
+
+.ui-resizable.ui-resizable-width::after:hover,
+.ui-resizable.ui-resizable-width::after:active {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.ui-resizable.ui-resizable-width::after {
+    box-shadow: 1px 0 2px rgba(0,0,0,0.05);
+}
+
+.ui-resizable.ui-resizable-width::after {
+    border-radius: 2px;
+}
