@@ -7,6 +7,7 @@
   import type { OnSyntaxChangeHandler } from './explorer'
   import { createOnSyntaxChangeHandler, getActiveParsedDocument } from './explorer'
   import { NewResizer } from './explorer/resizer'
+  import type { RequestFormData } from '../../../main/parser/DocumentParser'
 
   let collections = useCollections()
   let files = useFiles()
@@ -18,6 +19,7 @@
   let responseEditor: Monaco.editor.IStandaloneCodeEditor
   let responseEditorContainer: HTMLElement
   let responseIsVisible = false
+  let editorSyntaxIsVisible = true
 
   let loadingModal: HTMLDialogElement
   let addFilesModal: HTMLDialogElement
@@ -108,10 +110,18 @@
     $collections = await window.KulalaApi.getCollectionNames()
   }
 
+  const setFormDataValues = (formData: RequestFormData) => {
+    requestBodyTypeSelect.value = 'form-data'
+    console.log({ formData })
+  }
+
   const setValuesBasedOnBlock = (block: Block): void => {
     requestMethodSelect.value = block.request.method
     requestUrlInput.value = block.request.url
-    const body = block.request.body || ''
+    const body = block.request.body?.trim() || ''
+    if (block.request.formData) {
+      setFormDataValues(block.request.formData)
+    }
     editor.setValue(body)
   }
 
@@ -225,9 +235,9 @@
     })
     const layout = await window.KulalaApi.getLayout()
     containerLeftSection.style.width = layout.leftSectionWidth + 'px'
-    NewResizer(containerLeftSection, true, false, () => {
+    NewResizer(containerLeftSection, true, false, (w) => {
       window.KulalaApi.saveLayout({
-        leftSectionWidth: containerLeftSection.clientWidth
+        leftSectionWidth: w
       })
     })
   })
@@ -268,6 +278,12 @@
   $: if (editor) {
     onRawSyntaxSelectChange = createOnSyntaxChangeHandler(editor)
   }
+  $: editorSyntax,
+    (): void => {
+      alert('Syntax changed to ' + editorSyntax)
+      editorSyntaxIsVisible =
+        editorSyntax !== 'form-data' && editorSyntax !== 'x-www-form-urlencoded'
+    }
   $: $collections, onCollectionsChange()
 </script>
 
@@ -339,7 +355,10 @@
 </dialog>
 
 <div class="join w-full">
-  <div class="join-item ui-resizable ui-resizable-width w-full p-5" bind:this={containerLeftSection}>
+  <div
+    class="join-item ui-resizable ui-resizable-width w-full p-5"
+    bind:this={containerLeftSection}
+  >
     <div>
       <div class="text-right mb-5 mt-5">
         <button
@@ -534,6 +553,7 @@
     <div role="tablist" class="tabs tabs-lift mb-5 mt-5">
       <button role="tab" class="tab">Headers</button>
       <button role="tab" class="tab tab-active">Body</button>
+      <button role="tab" class="tab">Scripts</button>
     </div>
 
     <div class="join">
@@ -550,7 +570,7 @@
         <option value="graphql">GraphQL</option>
       </select>
       <select
-        class="join-item select w-fit"
+        class="join-item select w-fit {editorSyntaxIsVisible ? '' : 'hidden'}"
         bind:value={editorSyntax}
         on:change={onRawSyntaxSelectChange}
       >

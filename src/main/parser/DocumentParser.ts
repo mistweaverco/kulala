@@ -6,12 +6,18 @@ export interface Header {
   value: string
 }
 
+export interface RequestFormData {
+  key: string
+  value: string
+}
+
 interface Request {
   method: string
   url: string
   httpVersion: string
   headers: Header[]
   body: string | null
+  formData: RequestFormData[] | null
 }
 
 interface Metadata {
@@ -133,6 +139,7 @@ const parse = (content: string): Document | null => {
     let url: string = ''
     let httpVersion: string = ''
     let body: string | null = null
+    let formData: RequestFormData[] | null = null
 
     bn.children.forEach((node) => {
       if (node.type === 'pre_request_script') {
@@ -248,6 +255,52 @@ const parse = (content: string): Document | null => {
           if (child.type.endsWith('_body')) {
             body = child.text
           }
+          if (child.type === 'multipart_form_data') {
+            // this is a special case with an external_body child
+            // TODO: implement this
+            //
+            // it looks like this:
+            //
+            // ------WebKitFormBoundary{{$timestamp}}
+            // Content-Disposition: form-data; name="someFile"; filename="logo.png"
+            // Content-Type: image/jpeg
+            //
+            // < /home/marco/Pictures/avatar-aged-2025-banana.png
+
+            if (child.children.length > 1 && child.children[1].type === 'external_body') {
+              return
+            }
+            if (!formData) formData = []
+            let key: string | null = null
+            let value: string | null = null
+            // The value looks something like this:
+            // ------WebKitFormBoundary{{$timestamp}}
+            // Content-Disposition: form-data; name="x"
+            //
+            // 0
+            // so we need to parse it to get the key and value
+            // The key is the value of the name attribute in the Content-Disposition header
+            // The value is the text after the Content-Disposition header
+            const parts = child.text.split('\n')
+            parts.forEach((part) => {
+              if (part.startsWith('Content-Disposition')) {
+                const match = part.match(/name="([^"]+)"/)
+                if (match) {
+                  key = match[1]
+                }
+              } else if (key && value === null) {
+                value = part
+              } else if (key && value !== null) {
+                value += part
+                value = value.trim()
+              }
+              if (formData && key && value) {
+                formData.push({ key, value })
+                key = null
+                value = null
+              }
+            })
+          }
         })
 
         if (method === '') {
@@ -258,12 +311,14 @@ const parse = (content: string): Document | null => {
           httpVersion = 'HTTP/1.1'
         }
       }
+
       block.request = {
         method,
         url,
         httpVersion,
         headers,
-        body
+        body,
+        formData
       }
     })
     if (block.request?.url.length || block.metadata.length > 0 || block.comments.length > 0) {
