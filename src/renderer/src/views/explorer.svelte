@@ -20,6 +20,7 @@
   let responseEditorContainer: HTMLElement
   let responseIsVisible = false
   let editorSyntaxIsVisible = true
+  let isMultipartFormRequest = false
 
   let loadingModal: HTMLDialogElement
   let addFilesModal: HTMLDialogElement
@@ -110,18 +111,36 @@
     $collections = await window.KulalaApi.getCollectionNames()
   }
 
-  const setFormDataValues = (formData: RequestFormData) => {
+  const setMultipartFormDataValues = (formData: RequestFormData): void => {
     requestBodyTypeSelect.value = 'form-data'
     console.log({ formData })
+  }
+
+  const setRequestType = (block: Block): void => {
+    if (block.request.multipartFormData) {
+      requestBodyTypeSelect.value = 'form-data'
+    } else if (block.request.formData) {
+      requestBodyTypeSelect.value = 'x-www-form-urlencoded'
+    } else if (block.request.body) {
+      requestBodyTypeSelect.value = 'raw'
+    } else {
+      requestBodyTypeSelect.value = 'none'
+    }
   }
 
   const setValuesBasedOnBlock = (block: Block): void => {
     requestMethodSelect.value = block.request.method
     requestUrlInput.value = block.request.url
     const body = block.request.body?.trim() || ''
-    if (block.request.formData) {
-      setFormDataValues(block.request.formData)
+    if (block.request.multipartFormData) {
+      isMultipartFormRequest = true
+      editorSyntaxIsVisible = false
+      setMultipartFormDataValues(block.request.multipartFormData)
+    } else {
+      isMultipartFormRequest = false
+      editorSyntaxIsVisible = true
     }
+    setRequestType(block)
     editor.setValue(body)
   }
 
@@ -196,8 +215,8 @@
         processResponse(data)
       })
       .catch((err) => {
-        showInfoModal = true
-        infoModalContent = err
+        console.error(err)
+        // TODO: show error via modal
       })
       .finally(() => {
         isLoading = false
@@ -229,17 +248,27 @@
     })
     responseEditor.setModel(monaco.editor.createModel('', 'text'))
 
-    window.addEventListener('resize', () => {
+    const layoutEditors = (): void => {
       editor.layout()
       responseEditor.layout()
-    })
+    }
+    window.addEventListener('resize', layoutEditors)
     const layout = await window.KulalaApi.getLayout()
+    NewResizer(
+      containerLeftSection,
+      true,
+      false,
+      async (w) => {
+        await window.KulalaApi.saveLayout({
+          leftSectionWidth: w
+        })
+      },
+      () => {
+        layoutEditors()
+      }
+    )
     containerLeftSection.style.width = layout.leftSectionWidth + 'px'
-    NewResizer(containerLeftSection, true, false, (w) => {
-      window.KulalaApi.saveLayout({
-        leftSectionWidth: w
-      })
-    })
+    layoutEditors()
   })
   onDestroy(() => {
     monaco?.editor.getModels().forEach((model) => model.dispose())
@@ -278,12 +307,6 @@
   $: if (editor) {
     onRawSyntaxSelectChange = createOnSyntaxChangeHandler(editor)
   }
-  $: editorSyntax,
-    (): void => {
-      alert('Syntax changed to ' + editorSyntax)
-      editorSyntaxIsVisible =
-        editorSyntax !== 'form-data' && editorSyntax !== 'x-www-form-urlencoded'
-    }
   $: $collections, onCollectionsChange()
 </script>
 
@@ -356,7 +379,7 @@
 
 <div class="join w-full">
   <div
-    class="join-item ui-resizable ui-resizable-width w-full p-5"
+    class="relative join-item ui-resizable ui-resizable-width w-full p-5"
     bind:this={containerLeftSection}
   >
     <div>
@@ -470,6 +493,7 @@
         {/each}
       </div>
     </div>
+    <div class="ui-resizable-handle"></div>
   </div>
   <div class="join-item w-full p-5">
     {#if selectedRequest.block}
@@ -581,21 +605,37 @@
       </select>
     </div>
 
-    <div class="field mt-5">
-      <div class="control">
-        <div>
-          <div class="editor-wrap">
-            <div class="editor-container" bind:this={editorContainer} />
-          </div>
-        </div>
+    <div class="mt-5 {isMultipartFormRequest ? 'hidden' : ''}">
+      <div class="editor-wrap">
+        <div class="editor-container" bind:this={editorContainer} />
       </div>
     </div>
 
-    <div class="field mt-5">
-      <div class="control">
-        <div class="editor-wrap {responseIsVisible ? '' : 'hidden'}">
-          <div class="editor-container" bind:this={responseEditorContainer} />
-        </div>
+    <div class="mt-5 {isMultipartFormRequest ? '' : 'hidden'}">
+      {#if isMultipartFormRequest}
+        {#each selectedRequest.block.request.multipartFormData as item}
+          <div class="join w-full mb-5">
+            <input type="text" value={item.key} class="join-item input w-full" placeholder="Name" />
+            <input type="text" value={item.value} class="join-item input w-full" placeholder="Value" />
+            <button class="join-item btn btn-error">
+              <span class="icon">
+                <i class="fa fa-trash"></i>
+              </span>
+            </button>
+          </div>
+        {/each}
+        <button class="btn btn-success">
+          <span class="icon">
+            <i class="fa fa-plus"></i>
+            Add a new field
+          </span>
+        </button>
+      {/if}
+    </div>
+
+    <div class="mt-5">
+      <div class="editor-wrap {responseIsVisible ? '' : 'hidden'}">
+        <div class="editor-container" bind:this={responseEditorContainer} />
       </div>
     </div>
   </div>

@@ -6,7 +6,7 @@ export interface Header {
   value: string
 }
 
-export interface RequestFormData {
+export interface RequestMultipartFormData {
   key: string
   value: string
 }
@@ -17,7 +17,7 @@ interface Request {
   httpVersion: string
   headers: Header[]
   body: string | null
-  formData: RequestFormData[] | null
+  multipartFormData: RequestMultipartFormData[] | null
 }
 
 interface Metadata {
@@ -139,7 +139,7 @@ const parse = (content: string): Document | null => {
     let url: string = ''
     let httpVersion: string = ''
     let body: string | null = null
-    let formData: RequestFormData[] | null = null
+    let multipartFormData: RequestMultipartFormData[] | null = null
 
     bn.children.forEach((node) => {
       if (node.type === 'pre_request_script') {
@@ -270,7 +270,7 @@ const parse = (content: string): Document | null => {
             if (child.children.length > 1 && child.children[1].type === 'external_body') {
               return
             }
-            if (!formData) formData = []
+            if (!multipartFormData) multipartFormData = []
             let key: string | null = null
             let value: string | null = null
             // The value looks something like this:
@@ -294,8 +294,8 @@ const parse = (content: string): Document | null => {
                 value += part
                 value = value.trim()
               }
-              if (formData && key && value) {
-                formData.push({ key, value })
+              if (multipartFormData && key && value) {
+                multipartFormData.push({ key, value })
                 key = null
                 value = null
               }
@@ -318,7 +318,7 @@ const parse = (content: string): Document | null => {
         httpVersion,
         headers,
         body,
-        formData
+        multipartFormData: multipartFormData
       }
     })
     if (block.request?.url.length || block.metadata.length > 0 || block.comments.length > 0) {
