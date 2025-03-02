@@ -23,7 +23,7 @@ No login 🌈, no tracking 🕵️‍♀️, No Ads 🔥, no BS 💩.
 
 <p></p>
 
-![Kulala Screenshot](assets/screenshot.png)
+![Screenshot from 2025-03-02 02-24-57](https://github.com/user-attachments/assets/1cfab904-54a7-4d4e-b4fd-817847e9f1b2)
 
 </div>
 
