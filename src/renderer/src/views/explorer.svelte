@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from 'svelte'
   import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api'
   import { monaco } from './monaco'
-  import { type ParsedBlock, type ParsedDocument } from '../parser'
+  import type { Block, Document } from '../parser/DocumentParser'
   import { useCollections, useFiles } from '../stores'
   import type { OnSyntaxChangeHandler } from './explorer'
   import { createOnSyntaxChangeHandler, getActiveParsedDocument } from './explorer'
@@ -14,7 +14,7 @@
   let editor: Monaco.editor.IStandaloneCodeEditor
   let editorContainer: HTMLElement
 
-  let activeParsedDocument: ParsedDocument
+  let activeParsedDocument: Document
   let responseEditor: Monaco.editor.IStandaloneCodeEditor
   let responseEditorContainer: HTMLElement
   let responseIsVisible = false
@@ -108,10 +108,11 @@
     $collections = await window.KulalaApi.getCollectionNames()
   }
 
-  const setValuesBasedOnBlock = (block: ParsedBlock): void => {
-    requestMethodSelect.value = block.method
-    requestUrlInput.value = block.url
-    editor.setValue(block.body)
+  const setValuesBasedOnBlock = (block: Block): void => {
+    requestMethodSelect.value = block.request.method
+    requestUrlInput.value = block.request.url
+    const body = block.request.body || ''
+    editor.setValue(body)
   }
 
   let abortController: AbortController
@@ -237,7 +238,7 @@
     const block = activeParsedDocument.blocks[idx]
     if (block) {
       setValuesBasedOnBlock(block)
-      selectedRequest.name = block.name
+      selectedRequest.name = block.requestSeparator.text || `Request ${idx + 1}`
       selectedRequest.block = block
     }
   }
@@ -354,7 +355,7 @@
 
             <div class="field">
               {#each $collections as collectionName}
-                <div class="collapse collapse-arrow bg-base-100 border border-base-300">
+                <div class="collapse collapse-arrow bg-base-100 border border-base-300 mb-5">
                   <input
                     type="radio"
                     name="collection-accordion-1"
@@ -381,7 +382,7 @@
                       </div>
                     {/if}
                     {#each $files as file}
-                      <div class="collapse collapse-arrow bg-base-100 border border-base-300">
+                      <div class="collapse collapse-arrow bg-base-100 border border-base-300 mb-5">
                         <input
                           type="radio"
                           name="collection-file-accordion-1"
@@ -440,7 +441,8 @@
                                     <button
                                       class="cursor-pointer w-full"
                                       data-idx={idx}
-                                      on:click={onRequestClick}>{block.name}</button
+                                      on:click={onRequestClick}
+                                      >{block.requestSeparator.text || `Request ${idx + 1}`}</button
                                     >
                                   </div>
                                 </li>

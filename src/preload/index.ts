@@ -29,6 +29,9 @@ const KulalaApi = {
   getFileContent: async (fp: string): Promise<string> => {
     return await ipcRenderer.invoke('getFileContent', fp)
   },
+  getDocument: async (fp: string): Promise<Document> => {
+    return await ipcRenderer.invoke('getDocument', fp)
+  },
   removeFileFromCollection: async (cn: string, fp: string): Promise<void> => {
     await ipcRenderer.invoke('removeFileFromCollection', cn, fp)
   }
