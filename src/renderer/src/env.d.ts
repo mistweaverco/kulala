@@ -2,6 +2,7 @@
 /// <reference types="vite/client" />
 import { ElectronAPI } from '@electron-toolkit/preload'
 import type { Document } from '../../main/parser/DocumentParser'
+import type { LayoutData } from '../../main/stateKeeper'
 
 declare global {
   interface Window {
@@ -14,6 +15,8 @@ declare global {
       getFileContent: (fp: string) => Promise<string>
       getDocument: (fp: string) => Promise<Document>
       removeFileFromCollection: (cn: string, fp: string) => Promise<void>
+      saveLayout: (layout: { leftSectionWidth: number }) => Promise<void>
+      getLayout: () => Promise<LayoutData>
     }
   }
 }

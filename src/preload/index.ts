@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron'
 import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { LayoutData } from '../main/stateKeeper'
 
 type DBFilesRow = {
   collection: string
@@ -34,6 +35,12 @@ const KulalaApi = {
   },
   removeFileFromCollection: async (cn: string, fp: string): Promise<void> => {
     await ipcRenderer.invoke('removeFileFromCollection', cn, fp)
+  },
+  saveLayout: async (layout: { leftSectionWidth: number }): Promise<void> => {
+    await ipcRenderer.invoke('saveLayout', layout)
+  },
+  getLayout: async (): Promise<LayoutData> => {
+    return await ipcRenderer.invoke('getLayout')
   }
 }
 

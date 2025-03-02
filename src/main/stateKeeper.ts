@@ -2,18 +2,8 @@ import { screen } from 'electron'
 import settings from 'electron-settings'
 import { debounce } from './utils'
 
-type IceServer = {
-  urls: string
-  username?: string
-  credential?: string
-}
-
-export type SettingsData = {
-  username: string
-  color: string
-  language: string
-  isMicrophoneEnabledOnConnect: boolean
-  iceServers: IceServer[]
+export type LayoutData = {
+  leftSectionWidth: number
 }
 
 type WindowState = {
@@ -26,6 +16,36 @@ type WindowState = {
 
 type WindowStateKeeper = WindowState & {
   track: (win: Electron.BrowserWindow) => void
+}
+
+interface LayoutStateKeeper {
+  saveState: (s: LayoutData) => Promise<void>
+  getLayout: () => Promise<LayoutData>
+}
+
+export const layoutStateKeeper = async (): Promise<LayoutStateKeeper> => {
+  let layoutState: LayoutData
+  const hasState = await settings.has('layout')
+  if (hasState) {
+    layoutState = (await settings.get('layout')) as unknown as LayoutData
+  } else {
+    layoutState = {
+      leftSectionWidth: 320
+    }
+  }
+
+  const saveState = async (s: LayoutData): Promise<void> => {
+    await settings.set('layout', s)
+  }
+
+  const getLayout = async (): Promise<LayoutData> => {
+    return layoutState
+  }
+
+  return {
+    saveState,
+    getLayout
+  }
 }
 
 export const windowStateKeeper = async (windowName: string): Promise<WindowStateKeeper> => {

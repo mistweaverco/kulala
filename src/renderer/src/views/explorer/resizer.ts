@@ -1,7 +1,8 @@
 export const NewResizer = (
   container: HTMLElement,
   width: boolean = true,
-  height: boolean = true
+  height: boolean = true,
+  cb: (w: number, h: number) => void | undefined
 ): void => {
   const resizer = container
   let isResizing = false
@@ -26,5 +27,6 @@ export const NewResizer = (
 
   document.addEventListener('mouseup', () => {
     isResizing = false
+    if (cb) cb(container.offsetWidth, container.offsetHeight)
   })
 }

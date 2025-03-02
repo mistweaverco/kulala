@@ -3,6 +3,7 @@ import { pickFiles, type FileInfo } from './file'
 import { database, type DBFilesRow } from './database'
 import fs from 'fs'
 import { Document, DocumentParser } from './parser/DocumentParser'
+import { LayoutData, layoutStateKeeper } from './stateKeeper'
 
 export const ipcMainHandlersInit = (): void => {
   ipcMain.handle('pickFiles', async (_, cn: string): Promise<FileInfo[]> => {
@@ -33,6 +34,16 @@ export const ipcMainHandlersInit = (): void => {
 
   ipcMain.handle('removeFileFromCollection', async (_, cn: string, fp: string): Promise<void> => {
     await database.removeFile(cn, fp)
+  })
+
+  ipcMain.handle('saveLayout', async (_, layout: { leftSectionWidth: number }): Promise<void> => {
+    const lsk = await layoutStateKeeper()
+    await lsk.saveState(layout)
+  })
+
+  ipcMain.handle('getLayout', async (): Promise<LayoutData> => {
+    const lsk = await layoutStateKeeper()
+    return await lsk.getLayout()
   })
 
   ipcMain.handle('getAppVersion', (): string => {
