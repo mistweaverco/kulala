@@ -1,7 +1,7 @@
 // utils.ts
 import * as monaco from 'monaco-editor'
 import type { Writable } from 'svelte/store'
-import { getParsedDocument, type ParsedBlock, type ParsedDocument } from '../../parser'
+import type { Document } from '../../../../main/parser/DocumentParser'
 
 export type OnSyntaxChangeHandler = (evt: Event) => void
 
@@ -41,7 +41,6 @@ export const createOnFileRemoveFromCollectionClick = (collections: Writable<stri
   }
 }
 
-export const getActiveParsedDocument = async (filepath: string): Promise<ParsedDocument> => {
-  const fileContent = await window.KulalaApi.getFileContent(filepath)
-  return getParsedDocument(fileContent)
+export const getActiveParsedDocument = async (filepath: string): Promise<Document> => {
+  return await window.KulalaApi.getDocument(filepath)
 }

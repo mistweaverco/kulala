@@ -38,6 +38,16 @@ const database = {
             rows.forEach((row) => {
               row.name = path.basename(row.filepath)
             })
+            // sort by name, case-insensitive
+            rows.sort((a, b) => {
+              if (a.name.toLowerCase() < b.name.toLowerCase()) {
+                return -1
+              }
+              if (a.name.toLowerCase() > b.name.toLowerCase()) {
+                return 1
+              }
+              return 0
+            })
             resolve(rows)
           }
         }
@@ -50,7 +60,18 @@ const database = {
         if (err) {
           reject(err)
         } else {
-          resolve(rows.map((row) => row.collection))
+          // sort by collection name, case-insensitive
+          rows.sort((a, b) => {
+            if (a.collection.toLowerCase() < b.collection.toLowerCase()) {
+              return -1
+            }
+            if (a.collection.toLowerCase() > b.collection.toLowerCase()) {
+              return 1
+            }
+            return 0
+          })
+          const collections = rows.map((row) => row.collection)
+          resolve(collections)
         }
       })
     })
