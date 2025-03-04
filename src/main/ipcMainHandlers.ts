@@ -3,7 +3,8 @@ import { pickFiles, type FileInfo } from './file'
 import { database, type DBFilesRow } from './database'
 import fs from 'fs'
 import { Document, DocumentParser } from './parser/DocumentParser'
-import { LayoutData, layoutStateKeeper } from './stateKeeper'
+import { LayoutData, layoutStateKeeper, sessionStateKeeper, SessionState } from './stateKeeper'
+import { DocumentBuilder } from './parser/DocumentBuilder'
 
 export const ipcMainHandlersInit = (): void => {
   ipcMain.handle('pickFiles', async (_, cn: string): Promise<FileInfo[]> => {
@@ -44,6 +45,26 @@ export const ipcMainHandlersInit = (): void => {
   ipcMain.handle('getLayout', async (): Promise<LayoutData> => {
     const lsk = await layoutStateKeeper()
     return await lsk.getLayout()
+  })
+
+  ipcMain.handle('saveSession', async (_, s: SessionState): Promise<void> => {
+    const sk = await sessionStateKeeper()
+    await sk.saveState(s)
+  })
+
+  ipcMain.handle('getSession', async (): Promise<SessionState> => {
+    const sk = await sessionStateKeeper()
+    return await sk.getState()
+  })
+
+  ipcMain.handle('saveDocumentModel', async (_, doc: Document, fp: string): Promise<boolean> => {
+    const s = await DocumentBuilder.build(doc, true)
+    fs.writeFileSync(fp, s, 'utf-8')
+    return true
+  })
+
+  ipcMain.handle('saveFile', (_, s: string, fp: string): void => {
+    fs.writeFileSync(fp, s, 'utf-8')
   })
 
   ipcMain.handle('getAppVersion', (): string => {

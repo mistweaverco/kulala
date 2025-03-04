@@ -6,9 +6,14 @@ export interface Header {
   value: string
 }
 
-export interface RequestMultipartFormData {
+export interface RequestFormData {
   key: string
   value: string
+  type?: 'text' | 'file'
+  file?: {
+    fileName: string
+    contentType: string
+  }
 }
 
 interface Request {
@@ -17,7 +22,7 @@ interface Request {
   httpVersion: string
   headers: Header[]
   body: string | null
-  multipartFormData: RequestMultipartFormData[] | null
+  multipartFormData: RequestFormData[] | null
 }
 
 interface Metadata {
@@ -139,7 +144,7 @@ const parse = (content: string): Document | null => {
     let url: string = ''
     let httpVersion: string = ''
     let body: string | null = null
-    let multipartFormData: RequestMultipartFormData[] | null = null
+    let multipartFormData: RequestFormData[] | null = null
 
     bn.children.forEach((node) => {
       if (node.type === 'pre_request_script') {
