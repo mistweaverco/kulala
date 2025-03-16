@@ -185,8 +185,8 @@
         processResponse(data)
       })
       .catch((err) => {
-        showInfoModal = true
-        infoModalContent = err
+        console.error(err)
+        // TODO: show info modal with error
       })
       .finally(() => {
         isLoading = false

@@ -1,7 +1,7 @@
 // utils.ts
 import * as monaco from 'monaco-editor'
 import type { Writable } from 'svelte/store'
-import { getParsedDocument, type ParsedBlock, type ParsedDocument } from '../../parser'
+import { getParsedDocument, type ParsedDocument } from '../../parser'
 
 export type OnSyntaxChangeHandler = (evt: Event) => void
 
